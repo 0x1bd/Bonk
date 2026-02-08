@@ -119,6 +119,10 @@ class SoundboardViewModel(
         audioService?.play(sound, s.localVolume, s.remoteVolume)
     }
 
+    fun seekSound(id: String, percent: Float) {
+        audioService?.seek(id, percent)
+    }
+
     fun stopSound(id: String) = audioService?.stop(id)
     fun stopAll() = audioService?.stopAll()
     fun togglePause(id: String) = audioService?.togglePause(id)

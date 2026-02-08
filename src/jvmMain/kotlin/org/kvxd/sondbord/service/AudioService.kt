@@ -97,6 +97,19 @@ class AudioService(
         ids.forEach { stop(it) }
     }
 
+    fun seek(id: String, percent: Float) {
+        _activeSounds.update { list ->
+            list.map { if (it.id == id) it.copy(progress = percent) else it }
+        }
+
+        val runtime = synchronized(runtimeMap) { runtimeMap[id] } ?: return
+        val mpvPercent = percent * 100
+
+        listOfNotNull(runtime.localSocket, runtime.remoteSocket).forEach {
+            MpvClient.sendCommand(it, """{ "command": ["seek", $mpvPercent, "absolute-percent"] }""")
+        }
+    }
+
     fun togglePause(id: String) {
         val sound = _activeSounds.value.find { it.id == id } ?: return
         val newPaused = !sound.isPaused

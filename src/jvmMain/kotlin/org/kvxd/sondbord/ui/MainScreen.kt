@@ -95,7 +95,8 @@ fun MainScreen(state: UiState, viewModel: SoundboardViewModel) {
                         isShiftPressed = isShiftPressed,
                         onTogglePause = viewModel::togglePause,
                         onStop = viewModel::stopSound,
-                        onVolumeChange = viewModel::setSoundVolume
+                        onVolumeChange = viewModel::setSoundVolume,
+                        onSeek = viewModel::seekSound
                     )
                 }
             }

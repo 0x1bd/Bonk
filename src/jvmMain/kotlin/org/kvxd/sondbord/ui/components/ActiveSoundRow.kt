@@ -1,6 +1,5 @@
 package org.kvxd.sondbord.ui.components
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,8 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.Mic
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,7 +26,8 @@ fun ActiveSoundRow(
     isShiftPressed: Boolean,
     onTogglePause: (String) -> Unit,
     onStop: (String) -> Unit,
-    onVolumeChange: (String, Boolean, Float) -> Unit
+    onVolumeChange: (String, Boolean, Float) -> Unit,
+    onSeek: (String, Float) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -66,14 +65,30 @@ fun ActiveSoundRow(
                     fontSize = 13.sp,
                     maxLines = 1
                 )
-                Spacer(Modifier.height(4.dp))
 
-                val animatedProgress by animateFloatAsState(sound.progress)
-                LinearProgressIndicator(
-                    progress = animatedProgress,
-                    color = if (sound.isPaused) AppColors.TextDim else AppColors.Accent,
-                    backgroundColor = Color.Black,
-                    modifier = Modifier.fillMaxWidth().height(3.dp).clip(RoundedCornerShape(1.dp))
+                var isDragging by remember { mutableStateOf(false) }
+                var dragProgress by remember { mutableStateOf(0f) }
+
+                val currentProgress = if (isDragging) dragProgress else sound.progress
+
+                Slider(
+                    value = currentProgress,
+                    onValueChange = {
+                        isDragging = true
+                        dragProgress = it
+                    },
+                    onValueChangeFinished = {
+                        onSeek(sound.id, dragProgress)
+                        isDragging = false
+                    },
+                    colors = SliderDefaults.colors(
+                        thumbColor = if (sound.isPaused) AppColors.TextDim else AppColors.Accent,
+                        activeTrackColor = if (sound.isPaused) AppColors.TextDim else AppColors.Accent,
+                        inactiveTrackColor = Color.Black,
+                        activeTickColor = Color.Transparent,
+                        inactiveTickColor = Color.Transparent
+                    ),
+                    modifier = Modifier.fillMaxWidth().height(14.dp)
                 )
             }
 

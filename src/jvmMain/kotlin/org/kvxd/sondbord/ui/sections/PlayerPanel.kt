@@ -19,7 +19,8 @@ fun PlayerPanel(
     isShiftPressed: Boolean,
     onTogglePause: (String) -> Unit,
     onStop: (String) -> Unit,
-    onVolumeChange: (String, Boolean, Float) -> Unit
+    onVolumeChange: (String, Boolean, Float) -> Unit,
+    onSeek: (String, Float) -> Unit
 ) {
     Column(
         Modifier
@@ -38,7 +39,8 @@ fun PlayerPanel(
                     isShiftPressed = isShiftPressed,
                     onTogglePause = onTogglePause,
                     onStop = onStop,
-                    onVolumeChange = onVolumeChange
+                    onVolumeChange = onVolumeChange,
+                    onSeek = onSeek
                 )
             }
         }
