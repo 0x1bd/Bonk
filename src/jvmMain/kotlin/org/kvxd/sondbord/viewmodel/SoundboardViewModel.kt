@@ -4,8 +4,10 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.kvxd.sondbord.model.*
 import org.kvxd.sondbord.service.AudioService
+import org.kvxd.sondbord.service.DownloadProgress
 import org.kvxd.sondbord.service.PulseAudioSystem
 import org.kvxd.sondbord.service.SettingsRepository
+import org.kvxd.sondbord.service.YtDlpService
 import java.io.File
 
 sealed class AppState {
@@ -20,7 +22,8 @@ data class UiState(
     val settings: AppSettings = AppSettings(),
     val microphones: List<Microphone> = emptyList(),
     val filterMode: SoundFilter = SoundFilter.All,
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+    val downloadState: DownloadProgress = DownloadProgress("")
 )
 
 class SoundboardViewModel(
@@ -29,11 +32,14 @@ class SoundboardViewModel(
     socketDir: File,
     missingDependencies: List<String>
 ) {
+
     private val viewModelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private val audioService: AudioService? = if (missingDependencies.isEmpty()) {
         AudioService(socketDir, viewModelScope)
     } else null
+
+    private val ytDlpService = YtDlpService(soundsDir)
 
     private val _settings = MutableStateFlow(settingsRepo.load())
     private val _currentDir = MutableStateFlow(soundsDir)
@@ -92,8 +98,9 @@ class SoundboardViewModel(
         return combine(
             fileFlow,
             activeSoundsFlow,
-            contextFlow
-        ) { files, active, ctx ->
+            contextFlow,
+            ytDlpService.downloadState
+        ) { files, active, ctx, download ->
             UiState(
                 currentDir = ctx.dir,
                 sounds = files,
@@ -101,7 +108,8 @@ class SoundboardViewModel(
                 settings = ctx.settings,
                 microphones = ctx.mics,
                 filterMode = ctx.filter,
-                searchQuery = ctx.query
+                searchQuery = ctx.query,
+                downloadState = download
             )
         }
     }
@@ -132,12 +140,15 @@ class SoundboardViewModel(
 
     fun toggleFavorite(sound: SoundFile) {
         updateSettings { current ->
-            val newFavs = if (current.favorites.contains(sound.id)) current.favorites - sound.id else current.favorites + sound.id
+            val newFavs =
+                if (current.favorites.contains(sound.id)) current.favorites - sound.id else current.favorites + sound.id
             current.copy(favorites = newFavs)
         }
     }
 
-    fun navigate(dir: File) { if (dir.isDirectory) _currentDir.value = dir }
+    fun navigate(dir: File) {
+        if (dir.isDirectory) _currentDir.value = dir
+    }
 
     fun navigateUp() {
         val parent = _currentDir.value.parentFile
@@ -148,8 +159,13 @@ class SoundboardViewModel(
         }
     }
 
-    fun setFilter(mode: SoundFilter) { _filterMode.value = mode }
-    fun setSearch(query: String) { _searchQuery.value = query }
+    fun setFilter(mode: SoundFilter) {
+        _filterMode.value = mode
+    }
+
+    fun setSearch(query: String) {
+        _searchQuery.value = query
+    }
 
     fun toggleSort() {
         updateSettings { it.copy(sortMode = if (it.sortMode == SortMode.Name) SortMode.LastAdded else SortMode.Name) }
@@ -186,7 +202,12 @@ class SoundboardViewModel(
         return candidates
             .filter { (it.isDirectory && query.isEmpty() && filter == SoundFilter.All) || (it.extension.lowercase() in supported) }
             .map { SoundFile(it, settings.favorites.contains(it.absolutePath)) }
-            .filter { s -> (query.isEmpty() || s.name.contains(query, true)) && (filter == SoundFilter.All || s.isFavorite) }
+            .filter { s ->
+                (query.isEmpty() || s.name.contains(
+                    query,
+                    true
+                )) && (filter == SoundFilter.All || s.isFavorite)
+            }
             .sortedWith { a, b ->
                 if (a.file.isDirectory != b.file.isDirectory) {
                     if (a.file.isDirectory) -1 else 1
@@ -197,5 +218,12 @@ class SoundboardViewModel(
                     }
                 }
             }.toList()
+    }
+
+    fun downloadYoutube(url: String) {
+        viewModelScope.launch {
+            ytDlpService.downloadAudio(url)
+            refreshFiles()
+        }
     }
 }

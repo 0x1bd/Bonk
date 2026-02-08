@@ -1,5 +1,6 @@
 package org.kvxd.sondbord.ui.sections
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -7,9 +8,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -40,16 +43,29 @@ fun Sidebar(
         ) {
             SidebarSectionHeader("LIBRARY") {
                 IconButton(onClick = actions.onRefresh, modifier = Modifier.size(20.dp)) {
-                    Icon(Icons.Default.Refresh, null, tint = AppColors.TextDim)
+                    Icon(Icons.Default.Refresh, "Refresh Library", tint = AppColors.TextDim)
                 }
+            }
+
+            OutlinedButton(
+                onClick = actions.onOpenDownloader,
+                modifier = Modifier.fillMaxWidth().height(40.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    backgroundColor = AppColors.SurfaceLight.copy(alpha = 0.3f),
+                    contentColor = AppColors.Text
+                ),
+                border = BorderStroke(1.dp, AppColors.SurfaceLight),
+                contentPadding = PaddingValues(horizontal = 12.dp)
+            ) {
+                Icon(Icons.Default.CloudDownload, null, modifier = Modifier.size(18.dp), tint = AppColors.Accent)
+                Spacer(Modifier.width(10.dp))
+                Text("Download (yt-dlp)", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterButton("All", state.filterMode == SoundFilter.All) { actions.onFilterChange(SoundFilter.All) }
                 FilterButton("Favorites", state.filterMode == SoundFilter.Favorites) {
-                    actions.onFilterChange(
-                        SoundFilter.Favorites
-                    )
+                    actions.onFilterChange(SoundFilter.Favorites)
                 }
             }
 
@@ -104,7 +120,11 @@ fun Sidebar(
 
 @Composable
 private fun SidebarSectionHeader(text: String, action: @Composable (() -> Unit)? = null) {
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         Text(text, color = AppColors.TextDim, fontSize = 12.sp, fontWeight = FontWeight.Bold)
         action?.invoke()
     }

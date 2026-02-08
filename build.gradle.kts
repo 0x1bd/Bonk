@@ -19,11 +19,11 @@ kotlin {
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
+            implementation(libs.compose.components.material.icons.extended)
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlinx.serialization.json)
-            implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -43,7 +43,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Rpm, TargetFormat.Deb)
             packageName = "sondbord"
-            packageVersion = "0.1.1"
+            packageVersion = "0.1.2"
             description = "Soundboard for Linux"
             vendor = "kvxd"
 
@@ -53,8 +53,6 @@ compose.desktop {
                 rpmLicenseType = "MIT"
 
                 debMaintainer = "kvxd <0x1bd@proton.me>"
-
-                val dependencies = listOf("mpv", "pulseaudio-utils")
             }
         }
     }

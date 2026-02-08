@@ -148,7 +148,6 @@ class AudioService(
                 val updates = mutableMapOf<String, Float>()
                 currentIds.forEach { id ->
                     val runtime = synchronized(runtimeMap) { runtimeMap[id] }
-                    // Prefer local socket for status checks
                     val socket = runtime?.localSocket ?: runtime?.remoteSocket
                     if (socket != null) {
                         val resp = MpvClient.getProperty(socket, "percent-pos")

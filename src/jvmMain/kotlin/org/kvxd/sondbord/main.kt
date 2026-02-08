@@ -17,6 +17,7 @@ object Globals {
     val SOUNDS_DIR = File(APP_DIR, "sounds")
     val CONFIG_FILE = File(APP_DIR, "config.json")
     val SOCKET_DIR = File("/tmp/sondbord_sockets")
+    val YT_DLP_BIN = File(APP_DIR, "yt-dlp")
 
     fun init() {
         APP_DIR.mkdirs()

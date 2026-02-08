@@ -13,6 +13,9 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import org.kvxd.sondbord.Globals
+import org.kvxd.sondbord.model.Microphone
+import org.kvxd.sondbord.model.SoundFilter
+import org.kvxd.sondbord.ui.sections.DownloaderDialog
 import org.kvxd.sondbord.ui.sections.PlayerPanel
 import org.kvxd.sondbord.ui.sections.Sidebar
 import org.kvxd.sondbord.ui.sections.SoundBrowser
@@ -23,7 +26,10 @@ import org.kvxd.sondbord.viewmodel.UiState
 @Composable
 fun MainScreen(state: UiState, viewModel: SoundboardViewModel) {
     val focusManager = LocalFocusManager.current
+
     var isShiftPressed by remember { mutableStateOf(false) }
+    var isDownloaderOpen by remember { mutableStateOf(false) }
+
     val focusRequester = remember { FocusRequester() }
 
     Box(
@@ -48,8 +54,6 @@ fun MainScreen(state: UiState, viewModel: SoundboardViewModel) {
 
         Column(Modifier.fillMaxSize()) {
             Row(modifier = Modifier.weight(1f)) {
-                
-
                 Sidebar(
                     state = state,
                     isShiftPressed = isShiftPressed,
@@ -59,7 +63,8 @@ fun MainScreen(state: UiState, viewModel: SoundboardViewModel) {
                         onVolumeChange = viewModel::setMasterVolume,
                         onMicChange = viewModel::setMicrophone,
                         onRefresh = viewModel::refreshFiles,
-                        onStopAll = viewModel::stopAll
+                        onStopAll = viewModel::stopAll,
+                        onOpenDownloader = { isDownloaderOpen = true }
                     )
                 )
 
@@ -95,14 +100,23 @@ fun MainScreen(state: UiState, viewModel: SoundboardViewModel) {
                 }
             }
         }
+
+        if (isDownloaderOpen) {
+            DownloaderDialog(
+                downloadState = state.downloadState,
+                onDownload = viewModel::downloadYoutube,
+                onDismiss = { isDownloaderOpen = false }
+            )
+        }
     }
 }
 
 data class SidebarActions(
-    val onFilterChange: (org.kvxd.sondbord.model.SoundFilter) -> Unit,
+    val onFilterChange: (SoundFilter) -> Unit,
     val onSortChange: () -> Unit,
     val onVolumeChange: (Boolean, Float) -> Unit,
-    val onMicChange: (org.kvxd.sondbord.model.Microphone) -> Unit,
+    val onMicChange: (Microphone) -> Unit,
     val onRefresh: () -> Unit,
-    val onStopAll: () -> Unit
+    val onStopAll: () -> Unit,
+    val onOpenDownloader: () -> Unit
 )
