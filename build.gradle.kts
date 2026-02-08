@@ -38,11 +38,11 @@ kotlin {
 
 compose.desktop {
     application {
-        mainClass = "org.kvxd.sondbord.MainKt"
+        mainClass = "org.kvxd.bonk.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Rpm, TargetFormat.Deb)
-            packageName = "sondbord"
+            packageName = "bonk"
             packageVersion = "0.1.2"
             description = "Soundboard for Linux"
             vendor = "kvxd"

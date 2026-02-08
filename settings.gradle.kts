@@ -1,4 +1,4 @@
-rootProject.name = "sondbord"
+rootProject.name = "Bonk"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
