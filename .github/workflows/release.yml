@@ -40,7 +40,10 @@ jobs:
           generate_release_notes: true
 
       - name: Install RPM Tools
-        run: sudo apt-get update && sudo apt-get install -y rpm copr-cli
+          run: |
+            sudo apt-get update
+            sudo apt-get install -y rpm
+            pip install copr-cli
 
       - name: Generate Spec and SRPM
         run: |
