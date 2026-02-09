@@ -1,6 +1,6 @@
 package org.kvxd.bonk.service
 
-import org.kvxd.bonk.infra.ShellUtils
+import org.kvxd.bonk.utils.ShellUtils
 import org.kvxd.bonk.model.Microphone
 
 object PulseAudioSystem {

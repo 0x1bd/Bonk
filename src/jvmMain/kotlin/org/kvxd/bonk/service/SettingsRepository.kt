@@ -6,7 +6,10 @@ import java.io.File
 
 class SettingsRepository(private val file: File) {
 
-    private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
+    private val json = Json {
+        prettyPrint = true
+        ignoreUnknownKeys = true
+    }
 
     fun load(): AppSettings {
         if (!file.exists()) return AppSettings()

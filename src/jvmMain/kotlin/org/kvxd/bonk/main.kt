@@ -4,7 +4,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import org.kvxd.bonk.infra.DependencyChecker
+import org.kvxd.bonk.utils.DependencyChecker
 import org.kvxd.bonk.service.SettingsRepository
 import org.kvxd.bonk.ui.AppContent
 import org.kvxd.bonk.viewmodel.SoundboardViewModel

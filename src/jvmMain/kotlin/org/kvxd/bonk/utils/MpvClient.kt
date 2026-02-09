@@ -1,4 +1,4 @@
-package org.kvxd.bonk.infra
+package org.kvxd.bonk.utils
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.floatOrNull

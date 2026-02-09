@@ -4,10 +4,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.withContext
 import org.kvxd.bonk.Globals
-import org.kvxd.bonk.infra.ShellUtils
+import org.kvxd.bonk.utils.ShellUtils
 import java.io.File
 import java.net.URI
-import java.net.URL
 import java.nio.file.Files
 import java.nio.file.attribute.PosixFilePermissions
 

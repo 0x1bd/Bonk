@@ -1,4 +1,4 @@
-package org.kvxd.bonk.infra
+package org.kvxd.bonk.utils
 
 object ShellUtils {
 

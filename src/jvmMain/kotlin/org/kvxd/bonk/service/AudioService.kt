@@ -2,7 +2,7 @@ package org.kvxd.bonk.service
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.kvxd.bonk.infra.MpvClient
+import org.kvxd.bonk.utils.MpvClient
 import org.kvxd.bonk.model.ActiveSoundState
 import org.kvxd.bonk.model.SoundFile
 import java.io.File
