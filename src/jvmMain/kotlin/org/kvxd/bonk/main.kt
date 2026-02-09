@@ -4,6 +4,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import bonk.generated.resources.Res
+import bonk.generated.resources.bonk
+import org.jetbrains.compose.resources.painterResource
 import org.kvxd.bonk.utils.DependencyChecker
 import org.kvxd.bonk.service.SettingsRepository
 import org.kvxd.bonk.ui.AppContent
@@ -44,7 +47,7 @@ fun main() = application {
         onDispose { viewModel.onCleanup() }
     }
 
-    Window(onCloseRequest = ::exitApplication, title = "Bonk") {
+    Window(onCloseRequest = ::exitApplication, title = "Bonk", icon = painterResource(Res.drawable.bonk)) {
         AppContent(viewModel)
     }
 }

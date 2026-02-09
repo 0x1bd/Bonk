@@ -22,19 +22,32 @@ Soundboard for Linux.
 
 %install
 mkdir -p %{buildroot}/opt/%{name}
+mkdir -p %{buildroot}%{_bindir}
+mkdir -p %{buildroot}%{_datadir}/applications
+mkdir -p %{buildroot}%{_datadir}/icons/hicolor/512x512/apps
+
 cp -r bin lib %{buildroot}/opt/%{name}/
 
-mkdir -p %{buildroot}%{_bindir}
 ln -s /opt/%{name}/bin/%{name} %{buildroot}%{_bindir}/%{name}
 
-mkdir -p %{buildroot}%{_datadir}/applications
 cp bonk.desktop %{buildroot}%{_datadir}/applications/
 
-mkdir -p %{buildroot}%{_datadir}/icons/hicolor/512x512/apps
-cp lib/%{name}.png %{buildroot}%{_datadir}/icons/hicolor/512x512/apps/%{name}.png
+cp bonk.png %{buildroot}%{_datadir}/icons/hicolor/512x512/apps/%{name}.png
 
 chmod +x %{buildroot}/opt/%{name}/bin/%{name}
 find %{buildroot}/opt/%{name} -type f -name "*.so" -exec chmod +x {} +
+
+%post
+/bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null || :
+
+%postun
+if [ $1 -eq 0 ] ; then
+    /bin/touch --no-create %{_datadir}/icons/hicolor &>/dev/null
+    /usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
+fi
+
+%posttrans
+/usr/bin/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
 
 %files
 %defattr(-,root,root,-)
@@ -43,3 +56,6 @@ find %{buildroot}/opt/%{name} -type f -name "*.so" -exec chmod +x {} +
 %{_bindir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/512x512/apps/%{name}.png
+
+%changelog
+{{CHANGELOG}}

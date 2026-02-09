@@ -73,4 +73,8 @@ tasks.register<Zip>("packageDistributionTar") {
     from("bonk.desktop") {
         into("bonk-$appVersion")
     }
+
+    from("bonk.png") {
+        into("bonk-$appVersion")
+    }
 }
