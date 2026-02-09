@@ -8,6 +8,10 @@ Source0:        https://github.com/kvxd/bonk/releases/download/v%{version}/%{nam
 
 %global debug_package %{nil}
 
+Requires:       mpv
+Requires:       pulseaudio-utils
+Requires:       ffmpeg-free
+
 %description
 Soundboard for Linux.
 
@@ -29,7 +33,12 @@ cp bonk.desktop %{buildroot}%{_datadir}/applications/
 mkdir -p %{buildroot}%{_datadir}/icons/hicolor/512x512/apps
 cp lib/%{name}.png %{buildroot}%{_datadir}/icons/hicolor/512x512/apps/%{name}.png
 
+chmod +x %{buildroot}/opt/%{name}/bin/%{name}
+find %{buildroot}/opt/%{name} -type f -name "*.so" -exec chmod +x {} +
+
 %files
+%defattr(-,root,root,-)
+%attr(0755,root,root) /opt/%{name}/bin/%{name}
 /opt/%{name}
 %{_bindir}/%{name}
 %{_datadir}/applications/%{name}.desktop
