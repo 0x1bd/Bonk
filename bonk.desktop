@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Bonk
+Comment=Soundboard for Linux
+Exec=/usr/bin/bonk
+Icon=bonk
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;
+Keywords=soundboard;audio;

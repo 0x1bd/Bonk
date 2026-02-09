@@ -1,0 +1,80 @@
+name: Release to Copr
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Extract Version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Tarball
+        env:
+          APP_VERSION: ${{ steps.get_version.outputs.VERSION }}
+        run: ./gradlew packageDistributionTar
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/compose/binaries/main/tar/bonk-${{ steps.get_version.outputs.VERSION }}.tar.gz
+          generate_release_notes: true
+
+      - name: Install RPM Tools
+        run: sudo apt-get update && sudo apt-get install -y rpm copr-cli
+
+      - name: Generate Spec and SRPM
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          DATE=$(date "+%a %b %d %Y")
+          
+          sed -i "s/{{VERSION}}/$VERSION/g" bonk.spec
+          
+          echo "" >> bonk.spec
+          echo "%changelog" >> bonk.spec
+          echo "* $DATE kvxd <0x1bd@proton.me> - $VERSION-1" >> bonk.spec
+          echo "- Automatic release of version $VERSION" >> bonk.spec
+          
+          mkdir -p $HOME/rpmbuild/{SOURCES,SPECS,SRPMS}
+          cp bonk.spec $HOME/rpmbuild/SPECS/
+          
+          cp build/compose/binaries/main/tar/bonk-$VERSION.tar.gz $HOME/rpmbuild/SOURCES/
+          
+          rpmbuild -bs $HOME/rpmbuild/SPECS/bonk.spec
+
+      - name: Upload to Copr
+        env:
+          COPR_LOGIN: ${{ secrets.COPR_LOGIN }}
+          COPR_USERNAME: ${{ secrets.COPR_USERNAME }}
+          COPR_TOKEN: ${{ secrets.COPR_TOKEN }}
+          COPR_URL: https://copr.fedorainfracloud.org
+        run: |
+          mkdir -p ~/.config
+          echo "[copr-cli]" > ~/.config/copr
+          echo "login = $COPR_LOGIN" >> ~/.config/copr
+          echo "username = $COPR_USERNAME" >> ~/.config/copr
+          echo "token = $COPR_TOKEN" >> ~/.config/copr
+          echo "copr_url = $COPR_URL" >> ~/.config/copr
+          
+          SRPM_FILE=$(find $HOME/rpmbuild/SRPMS -name "*.src.rpm")
+          
+          copr-cli build ${{ secrets.COPR_USERNAME }}/bonk $SRPM_FILE

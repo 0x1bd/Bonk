@@ -8,6 +8,8 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
 }
 
+val appVersion = System.getenv("APP_VERSION") ?: "0.0.0"
+
 kotlin {
     jvm()
     jvmToolchain(21)
@@ -41,9 +43,9 @@ compose.desktop {
         mainClass = "org.kvxd.bonk.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Rpm, TargetFormat.Deb)
+            targetFormats(TargetFormat.Rpm)
             packageName = "bonk"
-            packageVersion = "0.1.2"
+            packageVersion = appVersion
             description = "Soundboard for Linux"
             vendor = "kvxd"
 
@@ -55,5 +57,24 @@ compose.desktop {
                 debMaintainer = "kvxd <0x1bd@proton.me>"
             }
         }
+    }
+}
+
+tasks.register<Zip>("packageDistributionTar") {
+    dependsOn("createReleaseDistributable")
+
+    archiveFileName.set("bonk-$appVersion.tar.gz")
+    destinationDirectory.set(layout.buildDirectory.dir("compose/binaries/main/tar"))
+
+    from(layout.buildDirectory.dir("compose/binaries/main/app/linux/x64/app")) {
+        into("bonk-$appVersion/bin")
+    }
+
+    from("bonk.desktop") {
+        into("bonk-$appVersion/share/applications")
+    }
+
+    from("bonk.png") {
+        into("bonk-$appVersion/share/icons/hicolor/512x512/apps")
     }
 }
