@@ -18,10 +18,10 @@ Soundboard for Linux.
 
 %install
 mkdir -p %{buildroot}/opt/%{name}
-cp -r bin/* %{buildroot}/opt/%{name}
+cp -r bin lib runtime %{buildroot}/opt/%{name}/
 
 mkdir -p %{buildroot}%{_bindir}
-ln -s /opt/%{name}/%{name} %{buildroot}%{_bindir}/%{name}
+ln -s /opt/%{name}/bin/%{name} %{buildroot}%{_bindir}/%{name}
 
 mkdir -p %{buildroot}%{_datadir}/applications
 cp share/applications/%{name}.desktop %{buildroot}%{_datadir}/applications/

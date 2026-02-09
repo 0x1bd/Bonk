@@ -67,7 +67,7 @@ tasks.register<Zip>("packageDistributionTar") {
     destinationDirectory.set(layout.buildDirectory.dir("compose/binaries/main/tar"))
 
     from(layout.buildDirectory.dir("compose/binaries/main/app/linux/x64/app")) {
-        into("bonk-$appVersion/bin")
+        into("bonk-$appVersion")
     }
 
     from("bonk.desktop") {
