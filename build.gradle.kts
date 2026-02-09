@@ -66,15 +66,11 @@ tasks.register<Zip>("packageDistributionTar") {
     archiveFileName.set("bonk-$appVersion.tar.gz")
     destinationDirectory.set(layout.buildDirectory.dir("compose/binaries/main/tar"))
 
-    from(layout.buildDirectory.dir("compose/binaries/main/app/linux/x64/app")) {
+    from(layout.buildDirectory.dir("compose/binaries/main-release/app/bonk")) {
         into("bonk-$appVersion")
     }
 
     from("bonk.desktop") {
-        into("bonk-$appVersion/share/applications")
-    }
-
-    from("bonk.png") {
-        into("bonk-$appVersion/share/icons/hicolor/512x512/apps")
+        into("bonk-$appVersion")
     }
 }
