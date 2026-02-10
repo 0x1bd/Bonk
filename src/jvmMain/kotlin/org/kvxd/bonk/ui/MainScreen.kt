@@ -13,18 +13,16 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import org.kvxd.bonk.Globals
-import org.kvxd.bonk.model.Microphone
-import org.kvxd.bonk.model.SoundFilter
+import org.kvxd.bonk.controller.SoundboardController
+import org.kvxd.bonk.controller.UiState
 import org.kvxd.bonk.ui.sections.DownloaderDialog
 import org.kvxd.bonk.ui.sections.PlayerPanel
 import org.kvxd.bonk.ui.sections.Sidebar
 import org.kvxd.bonk.ui.sections.SoundBrowser
 import org.kvxd.bonk.ui.theme.AppColors
-import org.kvxd.bonk.viewmodel.SoundboardViewModel
-import org.kvxd.bonk.viewmodel.UiState
 
 @Composable
-fun MainScreen(state: UiState, viewModel: SoundboardViewModel) {
+fun MainScreen(state: UiState) {
     val focusManager = LocalFocusManager.current
 
     var isShiftPressed by remember { mutableStateOf(false) }
@@ -57,15 +55,7 @@ fun MainScreen(state: UiState, viewModel: SoundboardViewModel) {
                 Sidebar(
                     state = state,
                     isShiftPressed = isShiftPressed,
-                    actions = SidebarActions(
-                        onFilterChange = viewModel::setFilter,
-                        onSortChange = viewModel::toggleSort,
-                        onVolumeChange = viewModel::setMasterVolume,
-                        onMicChange = viewModel::setMicrophone,
-                        onRefresh = viewModel::refreshFiles,
-                        onStopAll = viewModel::stopAll,
-                        onOpenDownloader = { isDownloaderOpen = true }
-                    )
+                    onOpenDownloader = { isDownloaderOpen = true }
                 )
 
                 Box(Modifier.width(1.dp).fillMaxHeight().background(AppColors.SurfaceLight))
@@ -75,11 +65,11 @@ fun MainScreen(state: UiState, viewModel: SoundboardViewModel) {
                     sounds = state.sounds,
                     searchQuery = state.searchQuery,
                     isHome = state.currentDir.absolutePath == Globals.SOUNDS_DIR.absolutePath,
-                    onSearch = viewModel::setSearch,
-                    onNavigate = viewModel::navigate,
-                    onNavigateUp = viewModel::navigateUp,
-                    onPlay = viewModel::playSound,
-                    onToggleFav = viewModel::toggleFavorite
+                    onSearch = { SoundboardController.setSearch(it) },
+                    onNavigate = { SoundboardController.navigate(it) },
+                    onNavigateUp = { SoundboardController.navigateUp() },
+                    onPlay = { SoundboardController.playSound(it) },
+                    onToggleFav = { SoundboardController.toggleFavorite(it) }
                 )
             }
 
@@ -93,10 +83,10 @@ fun MainScreen(state: UiState, viewModel: SoundboardViewModel) {
                     PlayerPanel(
                         activeSounds = state.activeSounds,
                         isShiftPressed = isShiftPressed,
-                        onTogglePause = viewModel::togglePause,
-                        onStop = viewModel::stopSound,
-                        onVolumeChange = viewModel::setSoundVolume,
-                        onSeek = viewModel::seekSound
+                        onTogglePause = { SoundboardController.togglePause(it) },
+                        onStop = { SoundboardController.stopSound(it) },
+                        onVolumeChange = { id, local, vol -> SoundboardController.setSoundVolume(id, local, vol) },
+                        onSeek = { id, pos -> SoundboardController.seekSound(id, pos) }
                     )
                 }
             }
@@ -105,19 +95,9 @@ fun MainScreen(state: UiState, viewModel: SoundboardViewModel) {
         if (isDownloaderOpen) {
             DownloaderDialog(
                 downloadState = state.downloadState,
-                onDownload = viewModel::downloadYoutube,
+                onDownload = { SoundboardController.downloadYoutube(it) },
                 onDismiss = { isDownloaderOpen = false }
             )
         }
     }
 }
-
-data class SidebarActions(
-    val onFilterChange: (SoundFilter) -> Unit,
-    val onSortChange: () -> Unit,
-    val onVolumeChange: (Boolean, Float) -> Unit,
-    val onMicChange: (Microphone) -> Unit,
-    val onRefresh: () -> Unit,
-    val onStopAll: () -> Unit,
-    val onOpenDownloader: () -> Unit
-)

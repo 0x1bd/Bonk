@@ -9,13 +9,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.kvxd.bonk.controller.SoundboardController
 import org.kvxd.bonk.ui.theme.AppColors
-import org.kvxd.bonk.viewmodel.AppState
-import org.kvxd.bonk.viewmodel.SoundboardViewModel
 
 @Composable
-fun AppContent(viewModel: SoundboardViewModel) {
-    val state by viewModel.appState.collectAsState()
+fun AppContent() {
+    val state by SoundboardController.uiState.collectAsState()
 
     MaterialTheme(
         colors = darkColors(
@@ -26,9 +25,10 @@ fun AppContent(viewModel: SoundboardViewModel) {
             onSurface = AppColors.Text
         )
     ) {
-        when (val s = state) {
-            is AppState.Error -> ErrorScreen(s.missingDeps)
-            is AppState.Ready -> MainScreen(s.uiState, viewModel)
+        if (state.error != null) {
+            ErrorScreen(state.error!!.split(", "))
+        } else {
+            MainScreen(state)
         }
     }
 }

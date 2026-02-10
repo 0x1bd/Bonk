@@ -18,20 +18,20 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.kvxd.bonk.controller.SoundboardController
 import org.kvxd.bonk.model.SortMode
 import org.kvxd.bonk.model.SoundFilter
-import org.kvxd.bonk.ui.SidebarActions
 import org.kvxd.bonk.ui.components.FilterButton
 import org.kvxd.bonk.ui.components.MicSelector
 import org.kvxd.bonk.ui.components.VolumeControl
 import org.kvxd.bonk.ui.theme.AppColors
-import org.kvxd.bonk.viewmodel.UiState
+import org.kvxd.bonk.controller.UiState
 
 @Composable
 fun Sidebar(
     state: UiState,
     isShiftPressed: Boolean,
-    actions: SidebarActions
+    onOpenDownloader: () -> Unit
 ) {
     Column(
         modifier = Modifier.width(260.dp).fillMaxHeight().background(AppColors.Surface).padding(16.dp),
@@ -42,39 +42,40 @@ fun Sidebar(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             SidebarSectionHeader("LIBRARY") {
-                IconButton(onClick = actions.onRefresh, modifier = Modifier.size(20.dp)) {
+                IconButton(onClick = { SoundboardController.refreshFiles() }, modifier = Modifier.size(20.dp)) {
                     Icon(Icons.Default.Refresh, "Refresh Library", tint = AppColors.TextDim)
                 }
             }
 
             OutlinedButton(
-                onClick = actions.onOpenDownloader,
+                onClick = onOpenDownloader,
+                enabled = state.isDownloaderAvailable,
                 modifier = Modifier.fillMaxWidth().height(40.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     backgroundColor = AppColors.SurfaceLight.copy(alpha = 0.3f),
                     contentColor = AppColors.Text
                 ),
-                border = BorderStroke(1.dp, AppColors.SurfaceLight),
+                border = BorderStroke(1.dp, if(state.isDownloaderAvailable) AppColors.SurfaceLight else AppColors.SurfaceLight.copy(alpha=0.5f)),
                 contentPadding = PaddingValues(horizontal = 12.dp)
             ) {
-                Icon(Icons.Default.CloudDownload, null, modifier = Modifier.size(18.dp), tint = AppColors.Accent)
+                Icon(Icons.Default.CloudDownload, null, modifier = Modifier.size(18.dp), tint = if(state.isDownloaderAvailable) AppColors.Accent else AppColors.TextDim)
                 Spacer(Modifier.width(10.dp))
                 Text("Download (yt-dlp)", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterButton("All", state.filterMode == SoundFilter.All) { actions.onFilterChange(SoundFilter.All) }
+                FilterButton("All", state.filterMode == SoundFilter.All) { SoundboardController.setFilter(SoundFilter.All) }
                 FilterButton("Favorites", state.filterMode == SoundFilter.Favorites) {
-                    actions.onFilterChange(SoundFilter.Favorites)
+                    SoundboardController.setFilter(SoundFilter.Favorites)
                 }
             }
 
             Divider(color = AppColors.SurfaceLight)
             SidebarSectionHeader("INPUT DEVICE")
-            MicSelector(state.microphones, state.settings.inputDeviceId, actions.onMicChange)
+            MicSelector(state.microphones, state.settings.inputDeviceId) { mic -> SoundboardController.setMicrophone(mic) }
 
             OutlinedButton(
-                onClick = actions.onSortChange,
+                onClick = { SoundboardController.toggleSort() },
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = AppColors.Text),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -91,8 +92,8 @@ fun Sidebar(
                 value = state.settings.localVolume,
                 max = 100f
             ) { newVal ->
-                actions.onVolumeChange(true, newVal)
-                if (isShiftPressed) actions.onVolumeChange(false, newVal)
+                SoundboardController.setMasterVolume(true, newVal)
+                if (isShiftPressed) SoundboardController.setMasterVolume(false, newVal)
             }
 
             VolumeControl(
@@ -101,13 +102,13 @@ fun Sidebar(
                 max = 100f,
                 color = AppColors.Danger
             ) { newVal ->
-                actions.onVolumeChange(false, newVal)
-                if (isShiftPressed) actions.onVolumeChange(true, newVal)
+                SoundboardController.setMasterVolume(false, newVal)
+                if (isShiftPressed) SoundboardController.setMasterVolume(true, newVal)
             }
         }
 
         Button(
-            onClick = actions.onStopAll,
+            onClick = { SoundboardController.stopAll() },
             colors = ButtonDefaults.buttonColors(backgroundColor = AppColors.Danger),
             modifier = Modifier.fillMaxWidth().height(48.dp)
         ) {

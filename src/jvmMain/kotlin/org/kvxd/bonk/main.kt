@@ -1,20 +1,19 @@
 package org.kvxd.bonk
 
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import bonk.generated.resources.Res
 import bonk.generated.resources.bonk
 import org.jetbrains.compose.resources.painterResource
-import org.kvxd.bonk.utils.DependencyChecker
+import org.kvxd.bonk.controller.SoundboardController
 import org.kvxd.bonk.service.SettingsRepository
 import org.kvxd.bonk.ui.AppContent
-import org.kvxd.bonk.viewmodel.SoundboardViewModel
+import org.kvxd.bonk.utils.DependencyChecker
 import java.io.File
 
 object Globals {
-
     private val USER_HOME = System.getProperty("user.home")
     val APP_DIR = File("$USER_HOME/.bonk")
     val SOUNDS_DIR = File(APP_DIR, "sounds")
@@ -30,24 +29,26 @@ object Globals {
     }
 }
 
-fun main() = application {
-    val viewModel = remember {
+fun main() {
+    System.setProperty("jdk.lang.Process.launchMechanism", "vfork")
+
+    application {
         Globals.init()
-        val missingDeps = DependencyChecker.checkMissing()
+        val scope = rememberCoroutineScope()
 
-        SoundboardViewModel(
-            settingsRepo = SettingsRepository(Globals.CONFIG_FILE),
-            soundsDir = Globals.SOUNDS_DIR,
-            socketDir = Globals.SOCKET_DIR,
-            missingDependencies = missingDeps
-        )
-    }
+        DisposableEffect(Unit) {
+            SoundboardController.initialize(
+                appScope = scope,
+                repo = SettingsRepository(Globals.CONFIG_FILE),
+                baseDir = Globals.SOUNDS_DIR,
+                socketDir = Globals.SOCKET_DIR,
+                missingDeps = DependencyChecker.checkMissing()
+            )
+            onDispose { SoundboardController.onCleanup() }
+        }
 
-    DisposableEffect(Unit) {
-        onDispose { viewModel.onCleanup() }
-    }
-
-    Window(onCloseRequest = ::exitApplication, title = "Bonk", icon = painterResource(Res.drawable.bonk)) {
-        AppContent(viewModel)
+        Window(onCloseRequest = ::exitApplication, title = "Bonk", icon = painterResource(Res.drawable.bonk)) {
+            AppContent()
+        }
     }
 }

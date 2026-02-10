@@ -10,6 +10,7 @@ import java.util.UUID
 
 class AudioService(
     private val socketDir: File,
+    private val mpvExecutable: String,
     private val scope: CoroutineScope
 ) {
 
@@ -58,7 +59,9 @@ class AudioService(
             }
             _activeSounds.update { it + state }
 
-            processes.forEach { runCatching { it.waitFor() } }
+            processes.forEach {
+                runCatching { it.waitFor() }
+            }
             cleanupSound(id)
         }
     }
@@ -66,14 +69,27 @@ class AudioService(
     private fun spawnMpv(path: String, device: String?, vol: Float, socket: String): Process? {
         return try {
             val args = mutableListOf(
-                "mpv", "--no-terminal", "--ao=pulse", "--vid=no", "--audio-display=no",
-                "--volume-max=250", "--volume=$vol", "--input-ipc-server=$socket",
+                mpvExecutable,
+                "--no-terminal",
+                "--ao=pulse",
+                "--vid=no",
+                "--audio-display=no",
+                "--volume-max=250",
+                "--volume=$vol",
+                "--input-ipc-server=$socket",
                 "--idle=no",
                 path
             )
-            if (device != null) args.add("--audio-device=pulse/$device")
-            ProcessBuilder(args).start()
+
+            if (device != null) {
+                args.add("--audio-device=pulse/$device")
+            }
+
+            ProcessBuilder(args)
+                .redirectErrorStream(true)
+                .start()
         } catch (e: Exception) {
+            println("Failed to spawn MPV: ${e.message}")
             e.printStackTrace()
             null
         }
