@@ -27,7 +27,7 @@ class AudioService(
         val job: Job
     )
 
-    private val REMOTE_SINK_NAME = "Soundboard_Mixer_Sink"
+    private val REMOTE_SINK_NAME = "Bonk_Sink"
     private val runtimeMap = ConcurrentHashMap<String, SoundRuntime>()
 
     init {

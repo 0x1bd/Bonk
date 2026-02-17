@@ -166,7 +166,7 @@ object SoundboardController {
 
     fun onCleanup() {
         audioService?.stopAll()
-        PulseAudioSystem.cleanup()
+        PulseAudioSystem.unloadAllBonkModules()
     }
 
     private fun reloadFileList() {
